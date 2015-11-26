@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title> Connect 4 </title>
+    <style>
+        .pathValue {
+            font-size: 13px;
+            bottom: 5px;
+            color: yellow;
+        }
+
+        .cameFrom {
+            font-size: 13px;
+            float: right;
+            color: greenyellow;
+        }
+
+        .wall {
+            /*fill: hsl(60, 5%, 50%);*/
+            /*stroke: hsl(60, 5%, 50%);*/
+            /*stroke-width: 1.5px;*/
+            background-color: wheat !important;
+        }
+    </style>
+</head>
+<body>
+Start:
+<input type="button" onclick="XOI.start(1)" value="Start"/>
+<input type="button" onclick="XOI.start(2)" value="Reset"/>
+<!--Depth value: <input type="text"  id="depthValue"/>-->
+<script src="js/main.js?6" ></script>
+</body>
+</html>
