@@ -1,379 +1,544 @@
-/**
- * Created by Luka on 26-Nov-15.
- */
-var Board = function(rows, columns, start, goal) {
-    self = this;
-    this.firstRun = true;
+var Connect4 = (function() {
+    var ConnectFourBoard;
+    var currentPlayer = 'red';
 
-    this.board = document.createElement('table');
-    this.board.id = 'board';
-    this.board.style.margin = '80px auto';
-
-    for(var i = 0; i < rows; i++) {
-        var blankRow = document.createElement('tr');
-        blankRow.id = 'row_' + i;
-
-        for(var j = 0; j < columns; j++) {
-            var blankTile = document.createElement('td');
-            blankTile.id = i + 'x' + j;
-            blankTile.style.backgroundColor = '#808080';
-            blankTile.style.width = '50px';
-            blankTile.style.height = '50px';
-            blankTile.style.color = '#F3102E';
-            blankTile.style.fontSize= '24px';
-            blankTile.style.textAlign = 'center';
-            blankTile.style.cursor = 'pointer';
-            blankTile.onclick = function(e) {
-                this.style.backgroundColor = '#808080';
-                this.style.width = '50px';
-                this.style.height = '50px';
-                this.style.color = '#F3102E';
-                this.style.fontSize= '24px';
-                this.style.border = '';
-                this.innerHTML = '';
-
-                if(this.className == 'wall') {
-                    this.className = '';
-                } else {
-                    this.className = 'wall';
-                }
-            };
-            blankRow.appendChild(blankTile);
-        }
-
-        this.board.appendChild(blankRow);
-    }
-
-    document.body.appendChild(this.board);
-
-    var highlightFrontNode = function(node) {
-        document.getElementById(node).style.backgroundColor = 'blue';
+    var init = function() {
+        ConnectFourBoard  = new Board(6, 7);
     };
 
-    var highlightCurrentNode = function(node) {
-        document.getElementById(node).style.backgroundColor = 'green';
+    var start = function() {
+
     };
 
-    var highlightVisitedNode = function(node) {
-        document.getElementById(node).style.backgroundColor = 'black';
-    };
-
-    var highlightGoalNodeCheck = function(node) {
-        document.getElementById(node).style.backgroundColor = 'purple';
-    };
-
-    var highlightGoal = function(node) {
-        document.getElementById(node).style.backgroundColor = 'yellow';
-    };
-
-    var highlightStart = function(node) {
-        document.getElementById(node).style.backgroundColor = 'white';
-    };
-
-    var highlightGoalRoad = function(node) {
-        document.getElementById(node).style.border = '4px solid yellow';
-    };
-
-    var clearNodeStyle = function(node) {
-        document.getElementById(node).style.backgroundColor = '#808080';
-    };
-
-    highlightGoal(goal);
-    highlightStart(start);
-
-    var createGoalRoad = function(road, goalNode) {
-        var from = road[goalNode];
-
-
-        if(road[goalNode] != "") {
-            highlightGoalRoad(from);
-            createGoalRoad(road, from);
-        }
-    };
-
-    var contains = function(a, obj) {
-        var i = a.length;
-        while (i--) {
-            if (a[i] === obj) {
-                return true;
-            }
-        }
-        return false;
-    };
-
-    var getFrontLine = function(node) {
-        var params = node.split('x'),
-            i = parseInt(params[0]),
-            j = parseInt(params[1]),
-            fl = [],
-            tempNode = '';
-
-        var isWall = function(node) {
-            return document.getElementById(node).className == 'wall';
-        };
-
-        if((i-1) >= 0) {
-            tempNode = (i-1) + 'x' + j;
-            if(!isWall(tempNode))
-                fl.push(tempNode);
-            //highlightFrontNode(tempNode);
-        }
-
-        if((j-1) >= 0) {
-            tempNode = i + 'x' + (j - 1);
-            if(!isWall(tempNode))
-                fl.push(tempNode);
-            //highlightFrontNode(tempNode);
-        }
-
-        if((i+1) < rows) {
-            tempNode = (i+1) + 'x' + j;
-            if(!isWall(tempNode))
-                fl.push(tempNode);
-            //highlightFrontNode(tempNode);
-        }
-
-        if((j+1) < columns) {
-            tempNode = i + 'x' + (j+1);
-            if(!isWall(tempNode))
-                fl.push(tempNode);
-            //highlightFrontNode(tempNode);
-        }
-
-        return fl;
-    };
-
-    this.reset = function() {
-        this.frontLine = [];
-        this.history = [];
-
-        var blankTile;
-
-        if(!this.firstRun) {
-            for(var i = 0; i < rows; i++) {
-                for(var j = 0; j < columns; j++) {
-                    blankTile = document.getElementById(i + 'x' + j);
-                    blankTile.style.backgroundColor = '#808080';
-                    blankTile.style.width = '50px';
-                    blankTile.style.height = '50px';
-                    blankTile.style.color = '#F3102E';
-                    blankTile.style.fontSize= '24px';
-                    blankTile.style.textAlign = 'center';
-                    blankTile.style.border = '';
-                    blankTile.innerHTML = '';
-                }
-            }
-
-            highlightGoal(goal);
-            highlightStart(start);
+    var changeActivePlayer = function() {
+        if(currentPlayer == 'red') {
+            currentPlayer = 'yellow';
         } else {
-            this.firstRun = false;
+            currentPlayer = 'red';
         }
     };
 
-    this.start = function(option) {
-        this.startNode = start;
-        this.goalNode = goal;
-        this.currentNode = start;
+    var Board = function(rows, columns) {
+        self = this;
+        this.firstRun = true;
 
-        this.reset();
+        this.board = document.createElement('table');
+        this.board.id = 'board';
+        this.board.style.margin = '80px auto';
 
-        this.depthOptions = {
-            depthVal: 3,
-            nodeBeingChecked : '',
-            found : false,
-            iteration : 0,
-            distance : {},
-            cameFrom : {},
-            unlimited : false
-        };
+        for(var i = 0; i < rows; i++) {
+            var blankRow = document.createElement('tr');
+            blankRow.id = 'row_' + i;
 
-        this.depthOptions.distance[this.startNode] = 0;
-        this.depthOptions.cameFrom[this.startNode] = "";
+            for(var j = 0; j < columns; j++) {
+                var blankTile = document.createElement('td');
+                blankTile.id = i + 'x' + j;
+                blankTile.style.backgroundColor = '#808080';
+                blankTile.style.width = '50px';
+                blankTile.style.height = '50px';
+                blankTile.style.color = '#F3102E';
+                blankTile.style.fontSize= '24px';
+                blankTile.style.textAlign = 'center';
+                blankTile.style.cursor = 'pointer';
+                /*blankTile.onclick = function(e) {
+                 this.style.backgroundColor = '#808080';
+                 this.style.width = '50px';
+                 this.style.height = '50px';
+                 this.style.color = '#F3102E';
+                 this.style.fontSize= '24px';
+                 this.style.border = '';
+                 this.innerHTML = '';
 
-        // Ovo sam koristio da bi svi nodovi dijelili jednu vrijednost umjesto da idem po nivoima
-        //this.depthOptions.depth = this.depthOptions.depthVal;
+                 if(this.className == 'wall') {
+                 this.className = 'grass';
+                 } else if(this.className == 'grass') {
+                 this.className = 'water';
+                 } else if(this.className == 'water') {
+                 this.className = '';
+                 } else {
+                 this.className = 'wall';
+                 }
+                 };*/
+                blankRow.appendChild(blankTile);
+            }
 
-        switch(option){
-            case 1:
-                this.realBreadthSearch(this.startNode);
-                break;
-            case 2:
-                var depthLevel = document.getElementById('depthValue').value;
+            blankRow.onclick = function(e) {
+                var column = e.target.id.split('x')[1];
 
-                if(depthLevel  == "") {
-                    depthLevel = -1;
-                    this.depthOptions.unlimited = true;
+                insertPiece(column);
+
+                var fourConnected = has4PiecesConnected();
+
+                if(fourConnected) {
+
+                    alert(currentPlayer + "has won!")
+                    return;
                 }
 
-                this.depthLimitSearch(this.startNode, depthLevel);
-                break;
-            case 3:
-                this.iterativeDeepeningSearch(this.startNode);
-                break;
+                changeActivePlayer();
+            };
+
+            this.board.appendChild(blankRow);
         }
-    };
 
-    this.sleep = function (miliseconds) {
-        var currentTime = new Date().getTime();
-        console.log("Sleeping for " + miliseconds + " ms...ZZZzzzzzzzzzzzzzz");
-        while (currentTime + miliseconds >= new Date().getTime()) {
-        }
-    };
+        var has4PiecesConnected = function() {
+            return false;
+        };
 
-    this.realBreadthSearch = function(startNode) {
-        var que = [],
-            nodeBeingChecked,
-            found = false,
-            iteration = 0,
-            iterationLvl = 1,
-            distance = {},
-            cameFrom = {};
+        var insertPiece = function(column) {
+            for (var i = rows - 1; i >= 0; i--) {
+                var tile = document.getElementById(i + 'x' + column);
 
-        highlightStart(startNode);
-        que.push(startNode);
-        distance[startNode] = 0;
-        cameFrom[startNode] = "";
+                if(tile.className == '') {
+                    tile.className = currentPlayer;
 
-        while(que.length > 0 && !found) {
-            var currentNode = que.shift(),
-                currentNodeHTML = document.getElementById(currentNode),
-                frontline = getFrontLine(currentNode),
-                oldStyle = '';
+                    break;
+                }
+            }
+        };
 
-            this.history.push(currentNode);
-            highlightCurrentNode(currentNode);
-            currentNodeHTML.innerHTML = currentNode;
+        document.body.appendChild(this.board);
 
-            //this.sleep(1000);
+        var NodeUtilities = {
+            insertLengthValue: function(node, distance) {
+                var lengthVal = document.createElement("span");
+                lengthVal.className = "pathValue";
+                lengthVal.innerHTML = distance;
+                node.appendChild(lengthVal);
+            },
+            insertCameFrom: function(node, cameFrom) {
+                var cameFromHTML = document.createElement("span");
+                cameFromHTML.className = "cameFrom";
+                cameFromHTML.innerHTML = cameFrom;
+                node.appendChild(cameFromHTML);
+            }
+        };
 
-            // prodji sve childove i provjeri je l goal
-            for(var i = 0; i < frontline.length; i++) {
-                nodeBeingChecked = frontline[i];
-                oldStyle = document.getElementById(nodeBeingChecked).style.backgroundColor;
-                highlightGoalNodeCheck(nodeBeingChecked);
+        var Heuristics = {
+            // TODO Opisati u diplomskom ovu vrstu Matematike i Manhattan distance
+            //Manhattan distance on a square grid - Taxi cab mathematics
+            manhattanDistance: function(to, from) {
+                var paramTo = to.split('x'),
+                    toX = parseInt(paramTo[0]),
+                    toY = parseInt(paramTo[1]),
+                    paramFrom = from.split('x'),
+                    fromX = parseInt(paramFrom[0]),
+                    fromY = parseInt(paramFrom[1]);
 
-                if(nodeBeingChecked == this.goalNode) {
-                    highlightGoal(nodeBeingChecked);
-                    found = true;
+                return Math.abs(toX - fromX) + Math.abs(toY - fromY);
+            }
+        };
 
-                    distance[nodeBeingChecked] = 1 + distance[currentNode];
-                    cameFrom[nodeBeingChecked] = currentNode;
+        var highlightFrontNode = function(node) {
+            document.getElementById(node).style.backgroundColor = 'blue';
+        };
 
-                    createGoalRoad(cameFrom, nodeBeingChecked);
-                } else {
-                    if(!contains(this.history, nodeBeingChecked) && !contains(que, nodeBeingChecked)) {
-                        que.push(nodeBeingChecked);
+        var highlightCurrentNode = function(node) {
+            document.getElementById(node).style.backgroundColor = 'green';
+        };
 
-                        distance[nodeBeingChecked] = 1 + distance[currentNode];
-                        cameFrom[nodeBeingChecked] = currentNode;
+        var highlightVisitedNode = function(node) {
+            document.getElementById(node).style.backgroundColor = 'black';
+        };
+
+        var highlightGoalNodeCheck = function(node) {
+            document.getElementById(node).style.backgroundColor = 'purple';
+        };
+
+        var highlightGoal = function(node) {
+            document.getElementById(node).style.backgroundColor = 'yellow';
+        };
+
+        var highlightStart = function(node) {
+            document.getElementById(node).style.backgroundColor = 'white';
+        };
+
+        var highlightGoalRoad = function(node) {
+            document.getElementById(node).style.border = '4px solid yellow';
+        };
+
+        var clearNodeStyle = function(node) {
+            document.getElementById(node).style.backgroundColor = '#808080';
+        };
+
+        var createGoalRoad = function(road, goalNode) {
+            var from = road[goalNode];
+
+
+            if(road[goalNode] != "") {
+                highlightGoalRoad(from);
+                createGoalRoad(road, from);
+            }
+        };
+
+        var contains = function(a, obj) {
+            var i = a.length;
+            while (i--) {
+                if (a[i] === obj) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        var getFrontLine = function(node) {
+            var params = node.split('x'),
+                i = parseInt(params[0]),
+                j = parseInt(params[1]),
+                fl = [],
+                tempNode = '';
+
+            var isWall = function(node) {
+                return document.getElementById(node).className == 'wall';
+            };
+
+            if((i-1) >= 0) {
+                tempNode = (i-1) + 'x' + j;
+                if(!isWall(tempNode))
+                    fl.push(tempNode);
+                //highlightFrontNode(tempNode);
+            }
+
+            if((j-1) >= 0) {
+                tempNode = i + 'x' + (j - 1);
+                if(!isWall(tempNode))
+                    fl.push(tempNode);
+                //highlightFrontNode(tempNode);
+            }
+
+            if((i+1) < rows) {
+                tempNode = (i+1) + 'x' + j;
+                if(!isWall(tempNode))
+                    fl.push(tempNode);
+                //highlightFrontNode(tempNode);
+            }
+
+            if((j+1) < columns) {
+                tempNode = i + 'x' + (j+1);
+                if(!isWall(tempNode))
+                    fl.push(tempNode);
+                //highlightFrontNode(tempNode);
+            }
+
+            return fl;
+        };
+
+        var movementCost = function(a, b) {
+            var tileType = document.getElementById(b).className;
+
+            if(tileType == 'grass') {
+                return 5;
+            } else if(tileType == 'water') {
+                return 10;
+            } else {
+                return 1;
+            }
+        };
+
+        this.reset = function() {
+            this.frontLine = [];
+            this.history = [];
+
+            var blankTile;
+
+            if(!this.firstRun) {
+                for(var i = 0; i < rows; i++) {
+                    for(var j = 0; j < columns; j++) {
+                        blankTile = document.getElementById(i + 'x' + j);
+                        blankTile.style.backgroundColor = '#808080';
+                        blankTile.style.width = '50px';
+                        blankTile.style.height = '50px';
+                        blankTile.style.color = '#F3102E';
+                        blankTile.style.fontSize= '24px';
+                        blankTile.style.textAlign = 'center';
+                        blankTile.style.border = '';
+                        blankTile.innerHTML = '';
                     }
                 }
-                if(!found) {
-                    document.getElementById(nodeBeingChecked).style.backgroundColor = oldStyle;
-                }
-            }
 
-            var lengthVal = document.createElement("span");
-            lengthVal.className = "pathValue";
-            lengthVal.innerHTML = distance[currentNode];
-            currentNodeHTML.appendChild(lengthVal);
-
-            var cameFromHTML = document.createElement("span");
-            cameFromHTML.className = "cameFrom";
-            cameFromHTML.innerHTML = cameFrom[currentNode];
-            currentNodeHTML.appendChild(cameFromHTML);
-
-            highlightVisitedNode(currentNode);
-        }
-    };
-
-    this.depthLimitSearch = function(currentNode, depth) {
-        if(currentNode == this.goalNode) {
-            highlightGoal(currentNode);
-
-            //self.depthOptions.cameFrom[currentNode] = currentNode;
-            //self.depthOptions.distance[currentNode] = 1 + self.depthOptions.distance[currentNode];
-            createGoalRoad(self.depthOptions.cameFrom, currentNode);
-
-            self.depthOptions.found = true;
-
-            return;
-        }
-
-        if(depth < 0 && !self.depthOptions.unlimited) {
-            return;
-        }/* else if(currentNode == self.startNode){
-         self.depthOptions.depth = self.depthOptions.depthVal;
-         self.depthLimitSearch(nodeBeingChecked);
-         //return;
-         }*/
-
-        var frontline = getFrontLine(currentNode),
-            currentNodeHTML = document.getElementById(currentNode),
-            oldStyle = '',
-            nodeBeingChecked;
-
-        highlightCurrentNode(currentNode);
-        currentNodeHTML.innerHTML = currentNode;
-
-        var lengthVal = document.createElement("span");
-        lengthVal.className = "pathValue";
-        lengthVal.innerHTML = self.depthOptions.distance[currentNode];
-        currentNodeHTML.appendChild(lengthVal);
-
-        var cameFromHTML = document.createElement("span");
-        cameFromHTML.className = "cameFrom";
-        cameFromHTML.innerHTML = self.depthOptions.cameFrom[currentNode];
-        currentNodeHTML.appendChild(cameFromHTML);
-
-        this.history.push(currentNode);
-
-        for(var i = 0; i < frontline.length; i++) {
-            if(self.depthOptions.found)
-                break;
-
-            nodeBeingChecked = frontline[i];
-            oldStyle = document.getElementById(nodeBeingChecked).style.backgroundColor;
-
-            if(!contains(this.history, nodeBeingChecked)) {
-                highlightGoalNodeCheck(nodeBeingChecked);
-                self.depthOptions.cameFrom[nodeBeingChecked] = currentNode;
-                self.depthOptions.distance[nodeBeingChecked] = 1 + self.depthOptions.distance[currentNode];
-
-                self.depthLimitSearch(nodeBeingChecked, depth - 1);
-
-                //highlightVisitedNode(nodeBeingChecked);
             } else {
-                continue;
+                this.firstRun = false;
             }
+        };
 
-            //clearNodeStyle(nodeBeingChecked);
-
-            //if(!self.depthOptions.found)
-            //highlightVisitedNode(nodeBeingChecked);// document.getElementById(nodeBeingChecked).style.backgroundColor = oldStyle;
-        }
-
-        highlightVisitedNode(currentNode);
-
-        return;
-    }
-
-    this.iterativeDeepeningSearch = function(currentNode) {
-        var depth = 0;
-
-        while(!self.depthOptions.found) {
-            depth++;
-            self.depthLimitSearch(currentNode, depth);
+        this.start = function(option) {
+            this.startNode = start;
+            this.goalNode = goal;
+            this.currentNode = start;
 
             this.reset();
 
-            if(self.depthOptions.found) {
-                console.log("Found him on Depth Level: " + depth);
+            this.depthOptions = {
+                depthVal: 3,
+                nodeBeingChecked : '',
+                found : false,
+                iteration : 0,
+                distance : {},
+                cameFrom : {},
+                unlimited : false
+            };
+
+            this.depthOptions.distance[this.startNode] = 0;
+            this.depthOptions.cameFrom[this.startNode] = "";
+
+            switch(option){
+                case 1:
+                    this.Dijkstra(this.startNode);
+                    break;
+                case 2:
+                    this.GreedyBestFirst(this.startNode);
+                    break;
+                case 3:
+                    this.A_Star(this.startNode);
+                    break;
+            }
+        };
+
+        this.sleep = function (miliseconds) {
+            var currentTime = new Date().getTime();
+            console.log("Sleeping for " + miliseconds + " ms...ZZZzzzzzzzzzzzzzz");
+            while (currentTime + miliseconds >= new Date().getTime()) {
+            }
+        };
+
+        this.Dijkstra = function(startNode) {
+            var frontier = [],
+                nodeBeingChecked,
+                found = false,
+                costSoFar = {},
+                cameFrom = {};
+
+            highlightStart(startNode);
+            frontier.push({
+                node : startNode,
+                priority: 0
+            });
+            costSoFar[startNode] = 0;
+            cameFrom[startNode] = "";
+
+            while(frontier.length > 0 && !found) {
+                var currentNode = frontier.shift().node,
+                    currentNodeHTML = document.getElementById(currentNode),
+                    neighbours = getFrontLine(currentNode),
+                    oldStyle = '',
+                    newCost = 0;
+
+                //this.history.push(currentNode);
+                highlightCurrentNode(currentNode);
+                currentNodeHTML.innerHTML = currentNode;
+
+                if(currentNode == this.goalNode) {
+                    highlightGoal(currentNode);
+                    found = true;
+
+                    //cameFrom[currentNode] = currentNode;
+
+                    createGoalRoad(cameFrom, currentNode);
+
+                    break;
+                }
+
+                // Od node iz frontier-a uzmi neighbours
+                for(var i = 0; i < neighbours.length; i++) {
+                    nodeBeingChecked = neighbours[i];
+                    newCost = costSoFar[currentNode] + movementCost(currentNode, nodeBeingChecked);
+
+                    oldStyle = document.getElementById(nodeBeingChecked).style.backgroundColor;
+                    highlightGoalNodeCheck(nodeBeingChecked);
+
+                    if(typeof costSoFar[nodeBeingChecked] == 'undefined' || newCost < costSoFar[nodeBeingChecked]) {
+                        costSoFar[nodeBeingChecked] = newCost;
+                        frontier.push({
+                            node: nodeBeingChecked,
+                            priority: newCost
+                        });
+
+                        cameFrom[nodeBeingChecked] = currentNode;
+                    }
+
+                    if(!found) {
+                        document.getElementById(nodeBeingChecked).style.backgroundColor = oldStyle;
+                    }
+                }
+
+                // Priority que pa sortiramo po najnizoj vrijednosti puta
+                frontier.sort(function(a, b){
+                    return a.priority - b.priority;
+                });
+
+                NodeUtilities.insertLengthValue(currentNodeHTML, costSoFar[currentNode]);
+                NodeUtilities.insertCameFrom(currentNodeHTML, cameFrom[currentNode]);
+                highlightVisitedNode(currentNode);
+            }
+        };
+
+        this.GreedyBestFirst = function(startNode) {
+            var frontier = [],
+                nodeBeingChecked,
+                found = false,
+                costSoFar = {},
+                cameFrom = {};
+
+            highlightStart(startNode);
+            frontier.push({
+                node : startNode,
+                priority: 0
+            });
+            costSoFar[startNode] = 0;
+            cameFrom[startNode] = "";
+
+            while(frontier.length > 0 && !found) {
+                var currentNode = frontier.shift().node,
+                    currentNodeHTML = document.getElementById(currentNode),
+                    neighbours = getFrontLine(currentNode),
+                    oldStyle = '',
+                    priority = 0;
+                //newCost = 0;
+
+                //this.history.push(currentNode);
+                highlightCurrentNode(currentNode);
+                currentNodeHTML.innerHTML = currentNode;
+
+                if(currentNode == this.goalNode) {
+                    highlightGoal(currentNode);
+                    found = true;
+
+                    //cameFrom[currentNode] = currentNode;
+
+                    createGoalRoad(cameFrom, currentNode);
+
+                    break;
+                }
+
+                // Od node iz frontier-a uzmi neighbours
+                for(var i = 0; i < neighbours.length; i++) {
+                    nodeBeingChecked = neighbours[i];
+                    //newCost = costSoFar[currentNode] + movementCost(currentNode, nodeBeingChecked);
+
+                    oldStyle = document.getElementById(nodeBeingChecked).style.backgroundColor;
+                    highlightGoalNodeCheck(nodeBeingChecked);
+
+                    if(typeof cameFrom[nodeBeingChecked] == 'undefined') {
+                        // For tracking - not used in calculations
+                        costSoFar[nodeBeingChecked] = costSoFar[currentNode] + movementCost(currentNode, nodeBeingChecked);;
+
+                        priority = Heuristics.manhattanDistance(this.goalNode, nodeBeingChecked);
+                        frontier.push({
+                            node: nodeBeingChecked,
+                            priority: priority
+                        });
+
+                        cameFrom[nodeBeingChecked] = currentNode;
+                    }
+
+                    if(!found) {
+                        document.getElementById(nodeBeingChecked).style.backgroundColor = oldStyle;
+                    }
+                }
+
+                // Priority que pa sortiramo po najnizoj vrijednosti puta
+                frontier.sort(function(a, b){
+                    return a.priority - b.priority;
+                });
+
+                NodeUtilities.insertLengthValue(currentNodeHTML, costSoFar[currentNode]);
+                NodeUtilities.insertCameFrom(currentNodeHTML, cameFrom[currentNode]);
+                highlightVisitedNode(currentNode);
+            }
+        };
+
+        this.A_Star = function(startNode) {
+            var frontier = [],
+                nodeBeingChecked,
+                found = false,
+                costSoFar = {},
+                cameFrom = {};
+
+            highlightStart(startNode);
+            frontier.push({
+                node : startNode,
+                priority: 0
+            });
+            costSoFar[startNode] = 0;
+            cameFrom[startNode] = startNode;
+
+            while(frontier.length > 0 && !found) {
+                var currentNode = frontier.shift().node,
+                    currentNodeHTML = document.getElementById(currentNode),
+                    neighbours = getFrontLine(currentNode),
+                    oldStyle = '',
+                    priority = 0,
+                    newCost = 0;
+
+                //this.history.push(currentNode);
+                highlightCurrentNode(currentNode);
+                currentNodeHTML.innerHTML = currentNode;
+
+                if(currentNode == this.goalNode) {
+                    highlightGoal(currentNode);
+                    found = true;
+
+                    //cameFrom[currentNode] = currentNode;
+
+                    createGoalRoad(cameFrom, currentNode);
+
+                    break;
+                }
+
+                // Od node iz frontier-a uzmi neighbours
+                for(var i = 0; i < neighbours.length; i++) {
+                    nodeBeingChecked = neighbours[i];
+                    newCost = costSoFar[currentNode] + movementCost(currentNode, nodeBeingChecked);
+
+                    oldStyle = document.getElementById(nodeBeingChecked).style.backgroundColor;
+                    highlightGoalNodeCheck(nodeBeingChecked);
+
+                    if(typeof costSoFar[nodeBeingChecked] == 'undefined' || newCost < costSoFar[nodeBeingChecked]) {
+                        costSoFar[nodeBeingChecked] = newCost;
+                        priority = newCost + Heuristics.manhattanDistance(this.goalNode, nodeBeingChecked);
+                        frontier.push({
+                            node: nodeBeingChecked,
+                            priority: priority
+                        });
+
+                        cameFrom[nodeBeingChecked] = currentNode;
+                    }
+
+                    if(!found) {
+                        document.getElementById(nodeBeingChecked).style.backgroundColor = oldStyle;
+                    }
+                }
+
+                // Priority que pa sortiramo po najnizoj vrijednosti puta
+                frontier.sort(function(a, b){
+                    return a.priority - b.priority;
+                });
+
+                NodeUtilities.insertLengthValue(currentNodeHTML, costSoFar[currentNode]);
+                NodeUtilities.insertCameFrom(currentNodeHTML, cameFrom[currentNode]);
+                highlightVisitedNode(currentNode);
             }
         }
-    };
-};
 
-var XOI = new Board(10, 20, '5x10', '2x5');
+        this.iterativeDeepeningSearch = function(currentNode) {
+            var depth = 0;
+
+            while(!self.depthOptions.found) {
+                depth++;
+                self.depthLimitSearch(currentNode, depth);
+
+                this.reset();
+
+                if(self.depthOptions.found) {
+                    console.log("Found him on Depth Level: " + depth);
+                }
+            }
+        };
+    };
+
+    return {
+        init: init,
+        start: start
+    }
+})().init();
 //XOI.start();
