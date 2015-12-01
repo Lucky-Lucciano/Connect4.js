@@ -1,13 +1,27 @@
 var Connect4 = (function() {
-    var ConnectFourBoard;
-    var currentPlayer = 'red';
+    var ConnectFourBoard,
+        currentPlayer,
+        player1Score,
+        player2Score;
 
     var init = function() {
+        currentPlayer = 'red';
+        player1Score = 0;
+        player2Score = 0;
+
         ConnectFourBoard  = new Board(6, 7);
     };
 
     var start = function() {
 
+    };
+
+    var resetScore = function() {
+        player1Score = 0;
+        player2Score = 0;
+
+        document.getElementById("score_p1").value = player1Score;
+        document.getElementById("score_p2").value = player2Score;
     };
 
     var changeActivePlayer = function() {
@@ -538,7 +552,10 @@ var Connect4 = (function() {
 
     return {
         init: init,
-        start: start
+        start: start,
+        resetScore: resetScore
     }
-})().init();
+})();
+
+Connect4.init();
 //XOI.start();

@@ -27,7 +27,7 @@
             /*fill: hsl(60, 5%, 50%);*/
             /*stroke: hsl(60, 5%, 50%);*/
             /*stroke-width: 1.5px;*/
-            background-color: greenyellow  !important;
+            background-color: greenyellow !important;
         }
 
         .water {
@@ -50,13 +50,43 @@
             /*stroke-width: 1.5px;*/
             background-color: #eced13 !important;
         }
+
+        #mainContainer {
+            width: 300px;
+            top: 200px;
+            position: relative;
+        }
+
+        #score {
+            width: 300px;
+        }
     </style>
 </head>
 <body>
-Start:
-<input type="button" onclick="XOI.start(1)" value="Start"/>
-<input type="button" onclick="XOI.start(2)" value="Reset"/>
+<div id="mainContainer">
+    <div>
+        Start:
+        <input type="button" onclick="Connect4.resetScore()" value="Start"/>
+        <input type="button" onclick="Connect4.resetScore()" value="Reset"/>
+    </div>
+
+    <div id="currentTurn">
+        Turn: <span id="currentPlayerTurn"> Red </span>
+    </div>
+
+    <div id="score">
+        <div> Score: </div>
+        Player 1 score: <input id="score_p1" type="text" value="0"/>
+        Player 2 score: <input id="score_p2" type="text" value="0"/>
+    </div>
+
+    <div id="controls">
+        <div> Controls: </div>
+        <input id="btnNewGame" type="button" onclick="Connect4.resetScore()" value="New Game"/>
+        <input id="btnUndo" type="button" onclick="Connect4.resetScore()" value="Undo"/>
+    </div>
+</div>
 <!--Depth value: <input type="text"  id="depthValue"/>-->
-<script src="js/main.js?6" ></script>
+<script src="js/Connect4.js?6"></script>
 </body>
 </html>
