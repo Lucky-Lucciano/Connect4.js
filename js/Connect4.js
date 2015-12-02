@@ -24,9 +24,23 @@ var Connect4 = (function() {
         document.getElementById("score_p2").value = player2Score;
     };
 
+    var createTile = function(type) {
+        var tile = document.createElement('img');
+
+        if(type == 'blue') {
+            tile.src = '/Connect-4/res/c4fillblu.gif';
+        } else if(type == 'red') {
+            tile.src = '/Connect-4/res/c4fillred.gif';
+        } else {
+            tile.src = '/Connect-4/res/c4fillempty.gif';
+        }
+
+        return tile;
+    };
+
     var changeActivePlayer = function() {
         if(currentPlayer == 'red') {
-            currentPlayer = 'yellow';
+            currentPlayer = 'blue';
         } else {
             currentPlayer = 'red';
         }
@@ -39,6 +53,7 @@ var Connect4 = (function() {
         this.board = document.createElement('table');
         this.board.id = 'board';
         this.board.style.margin = '80px auto';
+        this.board.style.backgroundColor = '#FFFF99';
 
         for(var i = 0; i < rows; i++) {
             var blankRow = document.createElement('tr');
@@ -47,13 +62,17 @@ var Connect4 = (function() {
             for(var j = 0; j < columns; j++) {
                 var blankTile = document.createElement('td');
                 blankTile.id = i + 'x' + j;
-                blankTile.style.backgroundColor = '#808080';
+                //blankTile.style.backgroundColor = '#808080';
                 blankTile.style.width = '50px';
                 blankTile.style.height = '50px';
                 blankTile.style.color = '#F3102E';
                 blankTile.style.fontSize= '24px';
                 blankTile.style.textAlign = 'center';
                 blankTile.style.cursor = 'pointer';
+
+                blankTile.appendChild(createTile());
+                blankRow.appendChild(blankTile);
+
                 /*blankTile.onclick = function(e) {
                  this.style.backgroundColor = '#808080';
                  this.style.width = '50px';
@@ -73,16 +92,20 @@ var Connect4 = (function() {
                  this.className = 'wall';
                  }
                  };*/
-                blankRow.appendChild(blankTile);
             }
 
             blankRow.onclick = function(e) {
-                var column = e.target.id.split('x')[1];
+                var target = e.target;
+
+                if(e.target.id == "") {
+                    target = e.target.parentNode;
+                }
+
+                var column = target.id.split('x')[1];
 
                 insertPiece(column);
 
                 var fourConnected = has4PiecesConnected();
-
                 if(fourConnected) {
 
                     alert(currentPlayer + "has won!")
@@ -104,6 +127,9 @@ var Connect4 = (function() {
                 var tile = document.getElementById(i + 'x' + column);
 
                 if(tile.className == '') {
+                    var newTile = currentPlayer == 'red' ? createTile('red') : createTile('blue');
+                    tile.childNodes[0].parentElement.removeChild(tile.childNodes[0]);
+                    tile.appendChild(newTile);
                     tile.className = currentPlayer;
 
                     break;
