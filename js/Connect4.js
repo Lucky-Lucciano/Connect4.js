@@ -24,20 +24,6 @@ var Connect4 = (function() {
         document.getElementById("score_p2").value = player2Score;
     };
 
-    var createTile = function(type) {
-        var tile = document.createElement('img');
-
-        if(type == 'blue') {
-            tile.src = '/Connect-4/res/c4fillblu.gif';
-        } else if(type == 'red') {
-            tile.src = '/Connect-4/res/c4fillred.gif';
-        } else {
-            tile.src = '/Connect-4/res/c4fillempty.gif';
-        }
-
-        return tile;
-    };
-
     var changeActivePlayer = function() {
         if(currentPlayer == 'red') {
             currentPlayer = 'blue';
@@ -46,81 +32,91 @@ var Connect4 = (function() {
         }
     };
 
+    var has4PiecesConnected = function() {
+        return false;
+    };
+
+    var newGame = function() {
+        resetScore();
+
+        ConnectFourBoard.reset();
+    };
+
     var Board = function(rows, columns) {
         self = this;
-        this.firstRun = true;
 
-        this.board = document.createElement('table');
-        this.board.id = 'board';
-        this.board.style.margin = '80px auto';
-        this.board.style.backgroundColor = '#FFFF99';
+        this.board = null;
 
-        for(var i = 0; i < rows; i++) {
-            var blankRow = document.createElement('tr');
-            blankRow.id = 'row_' + i;
+        var createTile = function(type) {
+            var tile = document.createElement('img');
 
-            for(var j = 0; j < columns; j++) {
-                var blankTile = document.createElement('td');
-                blankTile.id = i + 'x' + j;
-                //blankTile.style.backgroundColor = '#808080';
-                blankTile.style.width = '50px';
-                blankTile.style.height = '50px';
-                blankTile.style.color = '#F3102E';
-                blankTile.style.fontSize= '24px';
-                blankTile.style.textAlign = 'center';
-                blankTile.style.cursor = 'pointer';
-
-                blankTile.appendChild(createTile());
-                blankRow.appendChild(blankTile);
-
-                /*blankTile.onclick = function(e) {
-                 this.style.backgroundColor = '#808080';
-                 this.style.width = '50px';
-                 this.style.height = '50px';
-                 this.style.color = '#F3102E';
-                 this.style.fontSize= '24px';
-                 this.style.border = '';
-                 this.innerHTML = '';
-
-                 if(this.className == 'wall') {
-                 this.className = 'grass';
-                 } else if(this.className == 'grass') {
-                 this.className = 'water';
-                 } else if(this.className == 'water') {
-                 this.className = '';
-                 } else {
-                 this.className = 'wall';
-                 }
-                 };*/
+            if(type == 'blue') {
+                tile.src = '/Connect-4/res/c4fillblu.gif';
+            } else if(type == 'red') {
+                tile.src = '/Connect-4/res/c4fillred.gif';
+            } else {
+                tile.src = '/Connect-4/res/c4fillempty.gif';
             }
 
-            blankRow.onclick = function(e) {
-                var target = e.target;
-
-                if(e.target.id == "") {
-                    target = e.target.parentNode;
-                }
-
-                var column = target.id.split('x')[1];
-
-                insertPiece(column);
-
-                var fourConnected = has4PiecesConnected();
-                if(fourConnected) {
-
-                    alert(currentPlayer + "has won!")
-                    return;
-                }
-
-                changeActivePlayer();
-            };
-
-            this.board.appendChild(blankRow);
-        }
-
-        var has4PiecesConnected = function() {
-            return false;
+            return tile;
         };
+
+        var init = function() {
+            this.board = document.createElement('table');
+            this.board.id = 'board';
+            this.board.style.margin = '80px auto';
+            this.board.style.backgroundColor = '#FFFF99';
+            this.board.style.borderSpacing = '0px';
+
+            for(var i = 0; i < rows; i++) {
+                var blankRow = document.createElement('tr');
+                blankRow.id = 'row_' + i;
+
+                for(var j = 0; j < columns; j++) {
+                    var blankTile = document.createElement('td');
+                    blankTile.id = i + 'x' + j;
+                    //blankTile.style.backgroundColor = '#808080';
+                    blankTile.style.width = '50px';
+                    blankTile.style.height = '50px';
+                    blankTile.style.color = '#F3102E';
+                    blankTile.style.fontSize= '24px';
+                    blankTile.style.textAlign = 'center';
+                    blankTile.style.cursor = 'pointer';
+
+                    blankTile.appendChild(createTile());
+                    blankRow.appendChild(blankTile);
+                }
+
+                blankRow.onclick = function(e) {
+                    var target = e.target;
+
+                    if(e.target.id == "") {
+                        target = e.target.parentNode;
+                    }
+
+                    var column = target.id.split('x')[1];
+
+                    insertPiece(column);
+
+                    var fourConnected = has4PiecesConnected();
+                    if(fourConnected) {
+
+                        alert(currentPlayer + "has won!")
+                        return;
+                    }
+
+                    changeActivePlayer();
+                };
+
+                this.board.appendChild(blankRow);
+            }
+
+            document.body.appendChild(this.board);
+        };
+
+        init();
+
+
 
         var insertPiece = function(column) {
             for (var i = rows - 1; i >= 0; i--) {
@@ -137,7 +133,29 @@ var Connect4 = (function() {
             }
         };
 
-        document.body.appendChild(this.board);
+        this.reset = function() {
+            this.frontLine = [];
+            this.history = [];
+
+            var blankTile;
+
+            for (var i = 0; i < rows; i++) {
+                for (var j = 0; j < columns; j++) {
+                    blankTile = document.getElementById(i + 'x' + j);
+                    //blankTile.style.backgroundColor = '#808080';
+                    blankTile.style.width = '50px';
+                    blankTile.style.height = '50px';
+                    blankTile.style.color = '#F3102E';
+                    blankTile.style.fontSize = '24px';
+                    blankTile.style.textAlign = 'center';
+                    blankTile.style.border = '';
+                    blankTile.innerHTML = '';
+                    blankTile.className = '';
+
+                    blankTile.appendChild(createTile());
+                }
+            }
+        };
 
         var NodeUtilities = {
             insertLengthValue: function(node, distance) {
@@ -272,32 +290,6 @@ var Connect4 = (function() {
                 return 10;
             } else {
                 return 1;
-            }
-        };
-
-        this.reset = function() {
-            this.frontLine = [];
-            this.history = [];
-
-            var blankTile;
-
-            if(!this.firstRun) {
-                for(var i = 0; i < rows; i++) {
-                    for(var j = 0; j < columns; j++) {
-                        blankTile = document.getElementById(i + 'x' + j);
-                        blankTile.style.backgroundColor = '#808080';
-                        blankTile.style.width = '50px';
-                        blankTile.style.height = '50px';
-                        blankTile.style.color = '#F3102E';
-                        blankTile.style.fontSize= '24px';
-                        blankTile.style.textAlign = 'center';
-                        blankTile.style.border = '';
-                        blankTile.innerHTML = '';
-                    }
-                }
-
-            } else {
-                this.firstRun = false;
             }
         };
 
@@ -579,7 +571,8 @@ var Connect4 = (function() {
     return {
         init: init,
         start: start,
-        resetScore: resetScore
+        resetScore: resetScore,
+        newGame: newGame
     }
 })();
 
